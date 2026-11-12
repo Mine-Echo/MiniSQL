@@ -1,6 +1,7 @@
 #include "buffer/buffer_pool_manager.h"
 
 #include <cstdio>
+#include <limits>
 #include <random>
 #include <string>
 
@@ -12,7 +13,7 @@ TEST(BufferPoolManagerTest, BinaryDataTest) {
 
   std::random_device r;
   std::default_random_engine rng(r());
-  std::uniform_int_distribution<char> uniform_dist(0);
+  std::uniform_int_distribution<int> uniform_dist(0, std::numeric_limits<char>::max());
 
   remove(db_name.c_str());
   auto *disk_manager = new DiskManager(db_name);
@@ -28,7 +29,7 @@ TEST(BufferPoolManagerTest, BinaryDataTest) {
   char random_binary_data[PAGE_SIZE];
   // Generate random binary data
   for (char &i : random_binary_data) {
-    i = uniform_dist(rng);
+    i = static_cast<char>(uniform_dist(rng));
   }
 
   // Insert terminal characters both in the middle and at end

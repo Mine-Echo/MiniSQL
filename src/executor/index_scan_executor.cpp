@@ -6,7 +6,7 @@
 IndexScanExecutor::IndexScanExecutor(ExecuteContext *exec_ctx, const IndexScanPlanNode *plan)
     : AbstractExecutor(exec_ctx), plan_(plan) {}
 
-bool CompareRowId(RowId &a, RowId &b){
+bool CompareRowId(const RowId &a, const RowId &b){
   if(a.GetPageId() < b.GetPageId() || (a.GetPageId() == b.GetPageId() && a.GetSlotNum() < b.GetSlotNum())) return true;
   else return false;
 }
