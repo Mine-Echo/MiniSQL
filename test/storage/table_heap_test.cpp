@@ -60,3 +60,33 @@ TEST(TableHeapTest, TableHeapSampleTest) {
   }
   ASSERT_EQ(size, 0);
 }
+
+TEST(TableHeapTest, IteratorCopyAssignment) {
+  DBStorageEngine engine("iterator_copy_test.db", true, 8);
+  Schema schema({new Column("id", kTypeInt, 0, false, false)});
+  std::unique_ptr<TableHeap> heap(TableHeap::Create(engine.bpm_, &schema, nullptr, nullptr, nullptr));
+  for (int id : {1, 2}) {
+    Fields fields{Field(kTypeInt, id)};
+    Row row(fields);
+    ASSERT_TRUE(heap->InsertTuple(row, nullptr));
+  }
+
+  TableIterator assigned;
+  EXPECT_EQ(INVALID_ROWID, assigned->GetRowId());
+  auto first = heap->Begin(nullptr);
+  EXPECT_EQ(&assigned, &(assigned = first));
+  const TableIterator &alias = assigned;
+  EXPECT_EQ(&assigned, &(assigned = alias));
+  ASSERT_EQ(1U, assigned->GetFieldCount());
+  EXPECT_EQ(kTrue, assigned->GetField(0)->CompareEquals(Field(kTypeInt, 1)));
+
+  auto previous = assigned++;
+  EXPECT_EQ(first, previous);
+  EXPECT_EQ(kTrue, first->GetField(0)->CompareEquals(Field(kTypeInt, 1)));
+  EXPECT_EQ(kTrue, assigned->GetField(0)->CompareEquals(Field(kTypeInt, 2)));
+  ++previous;
+  EXPECT_EQ(assigned, previous);
+  EXPECT_NE(first, previous);
+  assigned = first;
+  EXPECT_EQ(first, assigned);
+}
