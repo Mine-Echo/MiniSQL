@@ -153,7 +153,8 @@ dberr_t ExecuteEngine::Execute(pSyntaxNode ast) {
   try {
     planner.PlanQuery(ast);
     // Execute the query.
-    ExecutePlan(planner.plan_, &result_set, nullptr, context.get());
+    auto status = ExecutePlan(planner.plan_, &result_set, nullptr, context.get());
+    if (status != DB_SUCCESS) return status;
   } catch (const exception &ex) {
     std::cout << "Error Encountered in Planner: " << ex.what() << std::endl;
     return DB_FAILED;
